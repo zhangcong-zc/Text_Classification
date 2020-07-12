@@ -44,8 +44,12 @@ class Model():
         self.accuracy = tf.reduce_mean(tf.cast(correct_predict, dtype=tf.float32))
 
 
-    # 根据rnn_type创建RNN层
     def get_rnn(self, rnn_type):
+        '''
+        根据rnn_type创建RNN层
+        :param rnn_type: RNN类型
+        :return:
+        '''
         if rnn_type == 'lstm':
             cell = contrib.rnn.BasicLSTMCell(num_units=self.config.hidden_dim, state_is_tuple=True)
         else :

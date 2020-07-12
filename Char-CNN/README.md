@@ -1,4 +1,4 @@
-## TextCNN (Convolutional Neural Networks for Sentence Classification)
+## Char-CNN (Character-level Convolutional Networks for Text Classification)
 
 
 ### 数据集：
@@ -20,6 +20,6 @@
 
 
 ### 参考资料
-* Convolutional Neural Networks for Sentence Classification (https://arxiv.org/abs/1408.5882)
-* https://www.cnblogs.com/bymo/p/9675654.html
+* Character-level Convolutional Networks for Text Classification (https://arxiv.org/abs/1509.01626)
+* https://www.cnblogs.com/jiangxinyang/p/10207686.html
 

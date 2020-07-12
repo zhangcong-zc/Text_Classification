@@ -1,4 +1,4 @@
-## TextCNN (Convolutional Neural Networks for Sentence Classification)
+## Transformer (Attention Is All You Need)
 
 
 ### 数据集：
@@ -20,6 +20,6 @@
 
 
 ### 参考资料
-* Convolutional Neural Networks for Sentence Classification (https://arxiv.org/abs/1408.5882)
-* https://www.cnblogs.com/bymo/p/9675654.html
+* Attention Is All You Need (https://arxiv.org/abs/1706.03762)
+* https://www.cnblogs.com/jiangxinyang/p/10210813.html
 

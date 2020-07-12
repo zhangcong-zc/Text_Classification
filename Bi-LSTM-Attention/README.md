@@ -1,4 +1,4 @@
-## TextCNN (Convolutional Neural Networks for Sentence Classification)
+## Bi-LSTM+Attention (Attention-Based Bidirectional Long Short-Term Memory Networks for Relation Classification)
 
 
 ### 数据集：
@@ -20,6 +20,6 @@
 
 
 ### 参考资料
-* Convolutional Neural Networks for Sentence Classification (https://arxiv.org/abs/1408.5882)
-* https://www.cnblogs.com/bymo/p/9675654.html
+* Attention-Based Bidirectional Long Short-Term Memory Networks for Relation Classification Classification (https://www.aclweb.org/anthology/P16-2034.pdf)
+* https://www.cnblogs.com/jiangxinyang/p/10208227.html
 

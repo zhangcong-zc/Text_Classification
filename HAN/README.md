@@ -1,4 +1,4 @@
-## TextCNN (Convolutional Neural Networks for Sentence Classification)
+## HAN (Multilingual Hierarchical Attention Networks for Document Classification)
 
 
 ### 数据集：
@@ -20,6 +20,6 @@
 
 
 ### 参考资料
-* Convolutional Neural Networks for Sentence Classification (https://arxiv.org/abs/1408.5882)
-* https://www.cnblogs.com/bymo/p/9675654.html
+* Multilingual Hierarchical Attention Networks for Document Classification (https://arxiv.org/abs/1707.00896)
+* https://blog.csdn.net/linchuhai/article/details/87281435
 

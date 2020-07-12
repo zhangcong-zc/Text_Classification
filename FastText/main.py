@@ -168,11 +168,11 @@ def text_processing(text):
 
 def pre_process(data_path, preprocess_path):
     '''
-        原始数据预处理
-        :param data_path: 原始文本文件路径
-        :param preprocess_path: 预处理后的数据存储路径
-        :return:
-        '''
+    原始数据预处理
+    :param data_path: 原始文本文件路径
+    :param preprocess_path: 预处理后的数据存储路径
+    :return:
+    '''
     # 加载停用词表
     logging.info('Start Preprocess ...')
     preprocess_file = open(preprocess_path, mode='w', encoding='UTF-8')

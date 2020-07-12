@@ -1,6 +1,6 @@
 # !/usr/bin/env python 
 # -*- coding: UTF-8 -*- 
-# @Time: 2020/4/5 17:31
+# @Time: 2020/4/20 22:42
 # @Author: Zhang Cong
 
 import os
@@ -21,9 +21,9 @@ config = Config()
 os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"                  # 按照PCI_BUS_ID顺序从0开始排列GPU设备
 os.environ["CUDA_VISIBLE_DEVICES"] = "0"                        # 设置当前使用的GPU设备仅为0号设备
 gpuConfig = tf.ConfigProto()
-gpuConfig.allow_soft_placement = True                           #设置为True，当GPU不存在或者程序中出现GPU不能运行的代码时，自动切换到CPU运行
-gpuConfig.gpu_options.allow_growth = True                       #设置为True，程序运行时，会根据程序所需GPU显存情况，分配最小的资源
-gpuConfig.gpu_options.per_process_gpu_memory_fraction = 0.8     #程序运行的时，所需的GPU显存资源最大不允许超过rate的设定值
+gpuConfig.allow_soft_placement = True                           # 设置为True，当GPU不存在或者程序中出现GPU不能运行的代码时，自动切换到CPU运行
+gpuConfig.gpu_options.allow_growth = True                       # 设置为True，程序运行时，会根据程序所需GPU显存情况，分配最小的资源
+gpuConfig.gpu_options.per_process_gpu_memory_fraction = 0.8     # 程序运行的时，所需的GPU显存资源最大不允许超过rate的设定值
 
 # 模型训练
 class Train():
@@ -41,11 +41,11 @@ class Train():
         # 构建词汇映射表
         if not os.path.exists(config.vocab_path):
             build_vocab(sentences, config.vocab_path)
-        word_to_id = read_vocab(config.vocab_path)      # 读取词汇表及其映射关系
+        word_to_id = read_vocab(config.vocab_path)           # 读取词汇表及其映射关系
         # 构建类别映射表
         if not os.path.exists(config.label_path):
             build_label(labels, config.label_path)
-        label_to_id = read_label(config.label_path)     # 读取类别表及其映射关系
+        label_to_id = read_label(config.label_path)  # 读取类别表及其映射关系
 
         # 构建训练数据集
         data_sentences, data_labels = data_transform(sentences, labels, word_to_id, label_to_id)
@@ -62,14 +62,14 @@ class Train():
 
         # 配置Saver
         saver = tf.train.Saver()
-        if not os.path.exists(config.model_save_path):      # 如不存在相应文件夹，则创建
+        if not os.path.exists(config.model_save_path):         # 如不存在相应文件夹，则创建
             os.mkdir(config.model_save_path)
 
         # 模型训练
         best_f1_score = 0  # 初始best模型的F1值
         for epoch in range(1, config.epochs + 1):
-            train_accuracy_list = []    # 存储每个epoch的accuracy
-            train_loss_list = []        # 存储每个epoch的loss
+            train_accuracy_list = []  # 存储每个epoch的accuracy
+            train_loss_list = []  # 存储每个epoch的loss
             # 将训练数据进行 batch_size 切分
             batch_train_data, batch_train_label = creat_batch_data(train_data, train_label, config.batch_size)
             for step, (batch_x, batch_y) in tqdm(enumerate(zip(batch_train_data, batch_train_label))):
@@ -84,10 +84,10 @@ class Train():
                                                                        float(np.mean(np.array(train_loss_list))),
                                                                        float(np.mean(np.array(train_accuracy_list)))))
             # 模型验证
-            test_accuracy_list = []         # 存储每个epoch的accuracy
-            test_loss_list = []             # 存储每个epoch的loss
-            test_label_list = []            # 存储数据的true label
-            test_predictions = []           # 存储模型预测出的label
+            test_accuracy_list = []     # 存储每个epoch的accuracy
+            test_loss_list = []         # 存储每个epoch的loss
+            test_label_list = []        # 存储数据的true label
+            test_predictions = []       # 存储模型预测出的label
             batch_test_data, batch_test_label = creat_batch_data(test_data, test_label, config.batch_size)
             for (batch_x, batch_y) in tqdm(zip(batch_test_data, batch_test_label)):
                 feed_dict = {self.model.input_x: batch_x,
@@ -107,8 +107,10 @@ class Train():
             report = metrics.classification_report(y_true=np.array(true_y), y_pred=np.array(test_predictions))
 
             logging.info('Test Epoch: %d , Loss: %.6f , Acc: %.6f , F1 Socre: %.6f' % (epoch,
-                                                                                       float(np.mean(np.array(test_loss_list))),
-                                                                                       float(np.mean(np.array(test_accuracy_list))),
+                                                                                       float(np.mean(
+                                                                                           np.array(test_loss_list))),
+                                                                                       float(np.mean(np.array(
+                                                                                           test_accuracy_list))),
                                                                                        f1_score))
             print('Report: \n', report)
             # 当前epoch产生的模型F1值超过最好指标时，保存当前模型
@@ -130,10 +132,10 @@ class Predict():
     # 结果预测
     def predict(self, sentence):
         # 加载词汇->ID映射表
-        word_to_id = read_vocab(config.vocab_path)
+        words, word_to_id = read_vocab(config.vocab_path)
         stopwords = [word.replace('\n', '').strip() for word in open(config.stopwords_path, encoding='UTF-8')]
         # 分词，去除停用词
-        sentence_seg = [word for word in text_processing(sentence).split(' ') if word not in stopwords and not word.isdigit()]
+        sentence_seg = [word for word in list(jieba.cut(sentence)) if word not in stopwords and not word.isdigit()]
         # 将词汇映射为ID
         sentence_id = [word_to_id[word] for word in sentence_seg if word in word_to_id]
         # 对句子进行padding
@@ -144,7 +146,7 @@ class Predict():
             sentence_id.extend([0] * (config.seq_length - sentence_length))
 
         feed_dict = {self.model.input_x: [sentence_id], self.model.input_keep_prob: 1.0}
-        predict = self.sess.run(self.model.predict, feed_dict=feed_dict)[0]
+        predict = self.sess.run(self.model.predict_data, feed_dict=feed_dict)[0]
 
         return predict
 
@@ -168,11 +170,11 @@ def text_processing(text):
 
 def pre_process(data_path, preprocess_path):
     '''
-        原始数据预处理
-        :param data_path: 原始文本文件路径
-        :param preprocess_path: 预处理后的数据存储路径
-        :return:
-        '''
+    原始数据预处理
+    :param data_path: 原始文本文件路径
+    :param preprocess_path: 预处理后的数据存储路径
+    :return:
+    '''
     # 加载停用词表
     logging.info('Start Preprocess ...')
     preprocess_file = open(preprocess_path, mode='w', encoding='UTF-8')

@@ -1,4 +1,4 @@
-## TextCNN (Convolutional Neural Networks for Sentence Classification)
+## LEAM (Joint Embedding of Words and Labels for Text Classification)
 
 
 ### 数据集：
@@ -20,6 +20,6 @@
 
 
 ### 参考资料
-* Convolutional Neural Networks for Sentence Classification (https://arxiv.org/abs/1408.5882)
-* https://www.cnblogs.com/bymo/p/9675654.html
+* Joint Embedding of Words and Labels for Text Classification (https://arxiv.org/abs/1805.04174)
+* https://blog.csdn.net/rensihui/article/details/105263327
 

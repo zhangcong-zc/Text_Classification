@@ -86,10 +86,10 @@ class Train():
                                                                        float(
                                                                            np.mean(np.array(train_accuracy_list)))))
             # 模型验证
-            test_accuracy_list = []  # 存储每个epoch的accuracy
-            test_loss_list = []  # 存储每个epoch的loss
-            test_label_list = []  # 存储数据的true label
-            test_predictions = []  # 存储模型预测出的label
+            test_accuracy_list = []         # 存储每个epoch的accuracy
+            test_loss_list = []             # 存储每个epoch的loss
+            test_label_list = []            # 存储数据的true label
+            test_predictions = []           # 存储模型预测出的label
             batch_test_data, batch_test_label = creat_batch_data(test_data, test_label, config.batch_size)
             for (batch_x, batch_y) in tqdm(zip(batch_test_data, batch_test_label)):
                 feed_dict = {self.model.input_x: batch_x,

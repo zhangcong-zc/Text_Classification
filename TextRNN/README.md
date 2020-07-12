@@ -1,14 +1,13 @@
-## TextCNN
+## TextRNN (Recurrent Neural Network for Text Classification with Multi-Task Learning)
+
 
 ### 数据集：
-##### SougouNews（http://www.sogou.com/labs/resource/cs.php）中选出10个类别的新闻，每个类别5000个样本，组成总量为50000的数据集：
+#### SougouNews (http://www.sogou.com/labs/resource/cs.php) 中选出10个类别的新闻，每个类别5000个样本，组成总量为50000的数据集：
     it、women、business、sports、yule、learning、travel、auto、health、house
 
 
-
 ### 数据形式：
-##### label \t content
-
+#### label \t content
 
 
 ### 文件解释
@@ -20,8 +19,7 @@
 * /save_model —— 模型存储文件夹
 
 
-
 ### 参考资料
-* Convolutional Neural Networks for Sentence Classification（https://arxiv.org/pdf/1408.5882.pdf）
-* https://www.cnblogs.com/bymo/p/9675654.html
+* Recurrent Neural Network for Text Classification with Multi-Task Learning (https://arxiv.org/abs/1605.05101)
+* https://zhuanlan.zhihu.com/p/96050637
 

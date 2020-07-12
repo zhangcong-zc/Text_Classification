@@ -4,6 +4,7 @@
 # @Author: Zhang Cong
 
 import os
+import re
 import jieba
 import logging
 import numpy as np
@@ -21,9 +22,9 @@ config = Config()
 os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"                  # 按照PCI_BUS_ID顺序从0开始排列GPU设备
 os.environ["CUDA_VISIBLE_DEVICES"] = "0"                        # 设置当前使用的GPU设备仅为0号设备
 gpuConfig = tf.ConfigProto()
-gpuConfig.allow_soft_placement = True                           #设置为True，当GPU不存在或者程序中出现GPU不能运行的代码时，自动切换到CPU运行
-gpuConfig.gpu_options.allow_growth = True                       #设置为True，程序运行时，会根据程序所需GPU显存情况，分配最小的资源
-gpuConfig.gpu_options.per_process_gpu_memory_fraction = 0.8     #程序运行的时，所需的GPU显存资源最大不允许超过rate的设定值
+gpuConfig.allow_soft_placement = True                           # 设置为True，当GPU不存在或者程序中出现GPU不能运行的代码时，自动切换到CPU运行
+gpuConfig.gpu_options.allow_growth = True                       # 设置为True，程序运行时，会根据程序所需GPU显存情况，分配最小的资源
+gpuConfig.gpu_options.per_process_gpu_memory_fraction = 0.8     # 程序运行的时，所需的GPU显存资源最大不允许超过rate的设定值
 
 # 模型训练
 class Train():
@@ -37,15 +38,15 @@ class Train():
         # 数据集预处理
         if not os.path.exists(config.preprocess_path):
             pre_process(config.original_data_path, config.preprocess_path)
-        sentences, labels = load_dataset(config.preprocess_path)      # 加载数据集
+        sentences, labels = load_dataset(config.preprocess_path)  # 加载数据集
         # 构建词汇映射表
         if not os.path.exists(config.vocab_path):
             build_vocab(sentences, config.vocab_path)
-        word_to_id = read_vocab(config.vocab_path)      # 读取词汇表及其映射关系
+        word_to_id = read_vocab(config.vocab_path)  # 读取词汇表及其映射关系
         # 构建类别映射表
         if not os.path.exists(config.label_path):
             build_label(labels, config.label_path)
-        label_to_id = read_label(config.label_path)     # 读取类别表及其映射关系
+        label_to_id = read_label(config.label_path)  # 读取类别表及其映射关系
 
         # 构建训练数据集
         data_sentences, data_labels = data_transform(sentences, labels, word_to_id, label_to_id)
@@ -68,15 +69,18 @@ class Train():
         # 模型训练
         best_f1_score = 0  # 初始best模型的F1值
         for epoch in range(1, config.epochs + 1):
-            train_accuracy_list = []    # 存储每个epoch的accuracy
-            train_loss_list = []        # 存储每个epoch的loss
+            train_accuracy_list = []  # 存储每个epoch的accuracy
+            train_loss_list = []  # 存储每个epoch的loss
             # 将训练数据进行 batch_size 切分
             batch_train_data, batch_train_label = creat_batch_data(train_data, train_label, config.batch_size)
             for step, (batch_x, batch_y) in tqdm(enumerate(zip(batch_train_data, batch_train_label))):
                 feed_dict = {self.model.input_x: batch_x,
                              self.model.input_y: batch_y,
                              self.model.input_keep_prob: config.keep_prob}
-                train_accuracy, train_loss, _ = self.sess.run([self.model.accuracy, self.model.loss, self.model.optimizer], feed_dict=feed_dict)
+                train_accuracy, train_loss, _ = self.sess.run([self.model.accuracy,
+                                                               self.model.loss,
+                                                               self.model.optimizer],
+                                                              feed_dict=feed_dict)
                 train_accuracy_list.append(train_accuracy)
                 train_loss_list.append(train_loss)
                 # 完成一个epoch的训练，输出训练数据的mean accuracy、mean loss
@@ -93,7 +97,10 @@ class Train():
                 feed_dict = {self.model.input_x: batch_x,
                              self.model.input_y: batch_y,
                              self.model.input_keep_prob: 1.0}
-                test_predict, test_accuracy, test_loss = self.sess.run([self.model.predict, self.model.accuracy, self.model.loss], feed_dict=feed_dict)
+                test_predict, test_accuracy, test_loss = self.sess.run([self.model.predict,
+                                                                        self.model.accuracy,
+                                                                        self.model.loss],
+                                                                       feed_dict=feed_dict)
                 test_accuracy_list.append(test_accuracy)
                 test_loss_list.append(test_loss)
                 test_label_list.extend(batch_y)
@@ -130,10 +137,10 @@ class Predict():
     # 结果预测
     def predict(self, sentence):
         # 加载词汇->ID映射表
-        word_to_id = read_vocab(config.vocab_path)
+        words, word_to_id = read_vocab(config.vocab_path)
         stopwords = [word.replace('\n', '').strip() for word in open(config.stopwords_path, encoding='UTF-8')]
         # 分词，去除停用词
-        sentence_seg = [word for word in text_processing(sentence).split(' ') if word not in stopwords and not word.isdigit()]
+        sentence_seg = [word for word in list(jieba.cut(sentence)) if word not in stopwords and not word.isdigit()]
         # 将词汇映射为ID
         sentence_id = [word_to_id[word] for word in sentence_seg if word in word_to_id]
         # 对句子进行padding
@@ -168,23 +175,29 @@ def text_processing(text):
 
 def pre_process(data_path, preprocess_path):
     '''
-        原始数据预处理
-        :param data_path: 原始文本文件路径
-        :param preprocess_path: 预处理后的数据存储路径
-        :return:
-        '''
+    原始数据预处理
+    :param data_path: 原始文本文件路径
+    :param preprocess_path: 预处理后的数据存储路径
+    :return:
+    '''
     # 加载停用词表
     logging.info('Start Preprocess ...')
     preprocess_file = open(preprocess_path, mode='w', encoding='UTF-8')
-    # 加载停用词表
     stopwords = [word.replace('\n', '').strip() for word in open(config.stopwords_path, encoding='UTF-8')]
+    # 按行循环读取文本数据
     for line in tqdm(open(data_path, encoding='UTF-8')):
-        label_sentence = str(line).strip().replace('\n', '').split('\t')    # 去除收尾空格、结尾换行符\n、使用\t切分
-        label = label_sentence[0]
-        sentence = label_sentence[1].replace('\t', '').replace('\n', '').replace(' ', '')   # 符号过滤
-        sentence = [word for word in text_processing(sentence).split(' ') if word not in stopwords and not word.isdigit()]
-        preprocess_file.write(label + '\t' + ' '.join(sentence) + '\n')
-
+        label_document = str(line).strip().replace('\n', '').split('\t')
+        label = label_document[0]
+        document = label_document[1].replace('\t', '').replace('\n', '').replace(' ', '')
+        # 使用标点符号进行分句
+        sentence_list = re.split('。|！|\!|\.|？|\?|．', document)
+        sentence_res = []
+        for sentence in sentence_list:
+            if len(sentence) > 0:
+                sentence = [word for word in text_processing(sentence).split(' ') if word not in stopwords and not word.isdigit()]
+                sentence_res.append(' '.join(sentence))
+        # 用 ## 来表示句子分隔符
+        preprocess_file.write(label + '\t' + '##'.join(sentence_res) + '\n')
     preprocess_file.close()
 
 
@@ -203,7 +216,7 @@ def load_dataset(data_path):
             label_sentence = str(line).strip().replace('\n', '').split('\t')
             label = label_sentence[0]                           # 标签
             sentence = label_sentence[1]                        # 以空格为切分的content
-            sentence = [word for word in sentence.split(' ')]
+            # sentence = [word for word in sentence.split(' ')]
             sentences.append(sentence)
             labels.append(label)
         except:
@@ -223,11 +236,11 @@ def build_vocab(input_data, vocab_path):
     logging.info('Build Vocab ...')
     all_data = []       # 全部句子集合
     for content in input_data:
-        all_data.extend(content)
+        all_data.extend(content.replace('##', ' ').split(' '))  # 去除句子分隔符##
 
-    counter = Counter(all_data)     # 词频统计
+    counter = Counter(all_data)      # 词频统计
     count_pairs = counter.most_common(config.vocab_size - 2)    # 对词汇按次数进行降序排序
-    words, _ = list(zip(*count_pairs))              # 将(word, count)元祖形式解压，转换为列表list
+    words, _ = list(zip(*count_pairs))                  # 将(word, count)元祖形式解压，转换为列表list
     # 添加一个 <PAD> 来将所有文本pad为同一长度
     words = ['<UNK>'] + list(words)  # 增加一个OOV标识的编码
     words = ['<PAD>'] + list(words)  # 增加一个PAD标识的编码
@@ -257,7 +270,6 @@ def read_vocab(vocab_path):
 
     return word_to_id
 
-
 def read_label(label_path):
     '''
     读取类别表，构建 类别-->ID 映射字典
@@ -280,24 +292,35 @@ def data_transform(input_data, input_label, word_to_id, label_to_id):
     :return: ID形式的文本，ID形式的标签
     '''
     logging.info('Sentence Trans To ID ...')
-    sentence_id = []
+    document_id = []
     # 将文本转换为ID表示[1,6,2,3,5,8,9,4]
-    for sentence in tqdm(input_data):
-        sentence_temp = []
-        for word in sentence:
-            if word in word_to_id:
-                sentence_temp.append(word_to_id[word])
-            else:
-                sentence_temp.append(word_to_id['<UNK>'])
+    for document in tqdm(input_data):     #  xxxxxxx##xxxxxxx##xxxxxxx##xxxxxxxx
+        sentence_list = document.split('##')       # 拆分句子
+        document_word_id = []
+        # 遍历当前document中的sentence
+        for sentence in sentence_list:
+            sentence_word_id = []
+            for word in sentence.split(' '):
+                if word in word_to_id:      # 如果word在词典中
+                    sentence_word_id.append(word_to_id[word])
+                else:                       # 如果word不在词典中
+                    sentence_word_id.append(word_to_id['<UNK>'])
 
-        # 对文本长度进行padding填充
-        sentence_length = len(sentence_temp)
-        if sentence_length > config.seq_length:
-            sentence_temp = sentence_temp[: config.seq_length]
+            # 获取句子中词汇数量，并对句子进行padding
+            sentence_length = len(sentence_word_id)
+            if sentence_length > config.sentence_word_num:  # 对句子进行截断
+                sentence_word_id = sentence_word_id[: config.sentence_word_num]
+            else:                                           # 对句子进行padding
+                sentence_word_id.extend([0] * (config.sentence_word_num - sentence_length))
+            document_word_id.append(sentence_word_id)
+
+        # 获取文档中句子数量，并对文档进行padding
+        document_length = len(document_word_id)
+        if document_length > config.document_sentence_num:
+            document_word_id = document_word_id[: config.document_sentence_num]
         else:
-            sentence_temp.extend([word_to_id['<PAD>']] * (config.seq_length - sentence_length))
-        sentence_id.append(sentence_temp)
-
+            document_word_id.extend(list(np.zeros(shape=[1, config.sentence_word_num])) * (config.document_sentence_num - document_length))
+        document_id.append(document_word_id)
 
     # 将标签转换为ID形式
     logging.info('Label Trans To One-Hot ...')
@@ -309,8 +332,8 @@ def data_transform(input_data, input_label, word_to_id, label_to_id):
             label_id.append(label_id_temp)
 
     # shuffle
-    indices = np.random.permutation(np.arange(len(sentence_id)))
-    datas = np.array(sentence_id)[indices]
+    indices = np.random.permutation(np.arange(len(document_id)))
+    datas = np.array(document_id)[indices]
     labels = np.array(label_id)[indices]
 
     return datas, labels
