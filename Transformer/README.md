@@ -19,6 +19,13 @@
 * /save_model —— 模型存储文件夹
 
 
+### 模型结构
+![avatar](./Transformer.png)
+* Transformer的输入是Word Embedding + Position Embedding。
+* Transformer中抛弃了传统的CNN和RNN，整个网络结构完全是由Attention机制组成
+* 和大多数seq2seq模型一样，transformer的结构也是由encoder和decoder组成
+
+
 ### 参考资料
 * Attention Is All You Need (https://arxiv.org/abs/1706.03762)
 * https://www.cnblogs.com/jiangxinyang/p/10210813.html

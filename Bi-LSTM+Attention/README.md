@@ -19,6 +19,11 @@
 * /save_model —— 模型存储文件夹
 
 
+### 模型结构
+![avatar](./Bi-LSTM+Attention.png)
+* Bi-LSTM+Attention就是在Bi-LSTM的模型上加入Attention层，在Bi-LSTM中我们会用最后一个时序的输出向量作为特征向量，然后进行Softmax分类。Attention是先计算每个时序的权重，然后将所有时序的向量进行加权和作为特征向量，然后进行Softmax分类。在实验中，加上Attention确实对结果有所提升。
+
+
 ### 参考资料
 * Attention-Based Bidirectional Long Short-Term Memory Networks for Relation Classification Classification (https://www.aclweb.org/anthology/P16-2034.pdf)
 * https://www.cnblogs.com/jiangxinyang/p/10208227.html

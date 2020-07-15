@@ -134,22 +134,41 @@ class Predict():
         self.saver = tf.train.Saver()
         self.saver.restore(sess=self.sess, save_path=config.model_save_path)
 
-    # 结果预测
-    def predict(self, sentence):
         # 加载词汇->ID映射表
-        words, word_to_id = read_vocab(config.vocab_path)
-        stopwords = [word.replace('\n', '').strip() for word in open(config.stopwords_path, encoding='UTF-8')]
+        self.word_to_id = read_vocab(config.vocab_path)
+        # 加载停用词
+        self.stopwords = [word.replace('\n', '').strip() for word in open(config.stopwords_path, encoding='UTF-8')]
+
+
+    def pre_process(self, sentence):
+        '''
+        文本数据预处理
+        :param sentence: 输入的文本句子
+        :return:
+        '''
         # 分词，去除停用词
-        sentence_seg = [word for word in list(jieba.cut(sentence)) if word not in stopwords and not word.isdigit()]
+        sentence_seg = [word for word in text_processing(sentence).split(' ') if word not in self.stopwords and not word.isdigit()]
         # 将词汇映射为ID
-        sentence_id = [word_to_id[word] for word in sentence_seg if word in word_to_id]
-        # 对句子进行padding
+        sentence_id = []
+        for word in sentence_seg:
+            if word in self.word_to_id:
+                sentence_id.append(self.word_to_id[word])
+            else:
+                sentence_id.append(self.word_to_id['<UNK>'])
+        # 对文本长度进行padding填充
         sentence_length = len(sentence_id)
         if sentence_length > config.seq_length:
             sentence_id = sentence_id[: config.seq_length]
         else:
-            sentence_id.extend([0] * (config.seq_length - sentence_length))
+            sentence_id.extend([self.word_to_id['<PAD>']] * (config.seq_length - sentence_length))
 
+        return sentence_id
+
+
+    # 结果预测
+    def predict(self, sentence):
+        # 对句子预处理并进行ID表示
+        sentence_id = self.pre_process(sentence)
         feed_dict = {self.model.input_x: [sentence_id], self.model.input_keep_prob: 1.0}
         predict = self.sess.run(self.model.predict, feed_dict=feed_dict)[0]
 

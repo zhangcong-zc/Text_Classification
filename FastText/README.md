@@ -23,6 +23,11 @@ Practically if your total number of categories is in the range of hundreds to th
 * /save_model —— 模型存储文件夹
 
 
+### 模型结构
+![avatar](./FastText.png)
+* FastText的网络结构与word2vec中的CBOW很相似，如图1所示。模型主要包含一个投影层和一个输出层，与CBOW的结构一样，其中，与CBOW主要有两点不同：第一个是CBOW的输入是每个单词的上下文单词，而FastText的输入的一个文本中的特征，可以是Ngram语言模型的特征；第二个是CBOW的输出的目标词汇，而FastText的输出则是文本的类别。
+
+
 ### 参考资料
 * Bag of Tricks for Efficient Text Classification (https://arxiv.org/abs/1607.01759)
 * https://blog.csdn.net/linchuhai/article/details/86648074

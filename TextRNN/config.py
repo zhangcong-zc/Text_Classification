@@ -18,7 +18,7 @@ class Config():
         self.batch_size = 32
         self.keep_prob = 0.5
         self.hidden_dim = 128
-        self.epochs = 10
+        self.epochs = 100
         self.vocab_size = 5000
         self.rnn_type = 'lstm'      # RNN类型：lstm/gru
         self.embedding_dim = 300
